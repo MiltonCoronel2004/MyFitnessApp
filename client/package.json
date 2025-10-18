@@ -1,8 +1,7 @@
 {
   "name": "client",
   "version": "1.0.0",
-  "main": "index.ts",
-  "type": "module",
+  "main": "expo-router/entry",
   "scripts": {
     "start": "expo start",
     "android": "expo start --android",
@@ -12,7 +11,11 @@
   "dependencies": {
     "@expo/metro-config": "~54.0.2",
     "@expo/metro-runtime": "~6.1.2",
+    "@expo/vector-icons": "^15.0.2",
     "expo": "~54.0.13",
+    "expo-constants": "~18.0.9",
+    "expo-linear-gradient": "~15.0.7",
+    "expo-linking": "~8.0.8",
     "expo-router": "~6.0.12",
     "expo-status-bar": "~3.0.8",
     "nativewind": "^5.0.0-preview.2",
@@ -22,6 +25,7 @@
     "react-native-css": "^3.0.1",
     "react-native-reanimated": "~4.1.1",
     "react-native-safe-area-context": "~5.6.0",
+    "react-native-screens": "~4.16.0",
     "react-native-web": "^0.21.0"
   },
   "devDependencies": {
