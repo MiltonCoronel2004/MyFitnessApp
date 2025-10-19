@@ -32,7 +32,13 @@ export default function CategoryList() {
   return (
     <View style={{ flex: 1, backgroundColor: "#0a0a0a", paddingTop: insets.top }}>
       <StatusBar style="light" />
-      <CreateCategoryModal isOpen={createModal} onClose={() => setCreateModal(false)} name={name} setName={setName} onConfirm={createCategory} />
+      <CreateCategoryModal
+        isOpen={createModal}
+        onClose={() => setCreateModal(false)}
+        name={name}
+        setName={setName}
+        onConfirm={handleCreateCategory}
+      />
       <Header />
 
       {CATEGORIES.length > 0 ? (
