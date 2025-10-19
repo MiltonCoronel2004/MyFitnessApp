@@ -11,10 +11,15 @@ const CATEGORIES = [];
 export default function CategoryList() {
   const insets = useSafeAreaInsets();
   const [createModal, setCreateModal] = useState(false);
+  const [name, setName] = useState("");
 
   const handleCreateCategory = async () => {
     try {
-      // const createCategory = await fetch();
+      const createCategory = await fetch("http://localhost:3000/api/categories/create", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name }),
+      });
     } catch (e) {
       console.error(e);
     }
@@ -27,7 +32,7 @@ export default function CategoryList() {
   return (
     <View style={{ flex: 1, backgroundColor: "#0a0a0a", paddingTop: insets.top }}>
       <StatusBar style="light" />
-      <CreateCategoryModal isOpen={createModal} onClose={() => setCreateModal(false)} />
+      <CreateCategoryModal isOpen={createModal} onClose={() => setCreateModal(false)} name={name} setName={setName} onConfirm={createCategory} />
       <Header />
 
       {CATEGORIES.length > 0 ? (
