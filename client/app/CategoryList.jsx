@@ -3,23 +3,53 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
 import Header from "../components/Header";
 import { Link } from "expo-router";
-import CreateCategoryModal from "../components/CreateCategoryModa";
+import CreateCategoryModal from "../components/CreateCategoryModal";
 import { useState } from "react";
+import { useEffect } from "react";
 
-const CATEGORIES = [];
+const url = process.env.EXPO_PUBLIC_API_URL;
 
 export default function CategoryList() {
   const insets = useSafeAreaInsets();
   const [createModal, setCreateModal] = useState(false);
   const [name, setName] = useState("");
+  const [errorMsg, setErrorMsg] = useState("");
+  const [categories, setCateogires] = useState([]);
 
   const handleCreateCategory = async () => {
     try {
-      const createCategory = await fetch("http://localhost:3000/api/categories/create", {
+      const res = await fetch(`${url}/api/categories/create`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name }),
       });
+      const data = await res.json();
+      if (!res.ok) {
+        setErrorMsg(data.errors.name);
+        return;
+      }
+
+      setCreateModal(false);
+      setName("");
+      setErrorMsg("");
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  useEffect(() => {
+    if (!errorMsg) return;
+    const timer = setTimeout(() => setErrorMsg(""), 3000);
+    return () => clearTimeout(timer);
+  }, [errorMsg]);
+
+  const getAllCategories = async () => {
+    try {
+      const res = await fetch(`${url}/api/categories/view/all`);
+      const data = res.json();
+      if (!res.ok) return console.error(data);
+
+      setCateogires(data);
     } catch (e) {
       console.error(e);
     }
@@ -39,9 +69,12 @@ export default function CategoryList() {
         setName={setName}
         onConfirm={handleCreateCategory}
       />
-      <Header />
 
-      {CATEGORIES.length > 0 ? (
+      <View style={{ position: "absolute", top: insets.top, left: 0, right: 0, zIndex: 10 }}>
+        <Header errorMsg={errorMsg} />
+      </View>
+
+      {categories.length > 0 ? (
         <ScrollView
           className="flex-1 px-4"
           contentContainerStyle={{
@@ -52,7 +85,7 @@ export default function CategoryList() {
           <Text className="text-white text-xl font-semibold tracking-tight mb-4">Exercise Categories</Text>
 
           <View className="gap-3">
-            {CATEGORIES.map((category) => (
+            {categories.map((category) => (
               <TouchableOpacity
                 key={category.id}
                 onPress={() => handleCategoryPress(category.id)}
@@ -75,8 +108,15 @@ export default function CategoryList() {
           </View>
         </ScrollView>
       ) : (
-        <ScrollView className="flex-1" contentContainerStyle={{ paddingBottom: insets.bottom + 24 }}>
-          <View className="flex-1 items-center justify-center py-32 px-4">
+        <ScrollView
+          className="flex-1"
+          contentContainerStyle={{
+            flexGrow: 1,
+            justifyContent: "center",
+            paddingBottom: insets.bottom + 24,
+          }}
+        >
+          <View className="items-center justify-center px-4">
             <View className="items-center gap-6">
               <View className="w-20 h-20 bg-neutral-900 rounded-full items-center justify-center">
                 <Text className="text-neutral-700 text-4xl font-light">∅</Text>

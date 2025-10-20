@@ -1,6 +1,8 @@
 import express from "express";
-import { createCategory } from "../controllers/categoryController";
+import { createCategory, getAllCategories } from "../controllers/categoryController.js";
+import { createValidator } from "../middleware/validators/categoryValidator.js";
 
 export const categoryRoutes = express.Router();
 
-categoryRoutes.post("/create", createCategory);
+categoryRoutes.post("/create", createValidator, createCategory);
+categoryRoutes.get("/view/all", getAllCategories);

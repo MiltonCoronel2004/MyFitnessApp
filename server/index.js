@@ -13,7 +13,7 @@ app.use(cors());
 app.use("/api/users", userRoutes);
 app.use("/api/categories", categoryRoutes);
 
-app.listen(PORT, async () => {
+app.listen(PORT, "0.0.0.0", async () => {
   try {
     if (!process.env.JWT_SECRET) {
       throw new Error("JWT_SECRET no definido en variables de entorno");
