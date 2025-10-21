@@ -1,15 +1,12 @@
-import { MMKV } from "react-native-mmkv";
+import "react-native-get-random-values";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { v4 as uuidv4 } from "uuid";
 
-// Inicializa el almacenamiento nativo
-const storage = new MMKV();
+export async function getAnonymousId() {
+  const existingId = await AsyncStorage.getItem("anonymous_user_id");
+  if (existingId) return existingId;
 
-// Genera o recupera el ID anónimo
-export function getOrCreateAnonymousId() {
-  let id = storage.getString("anonymous_id");
-  if (!id) {
-    id = uuidv4();
-    storage.set("anonymous_id", id);
-  }
-  return id;
+  const newId = uuidv4();
+  await AsyncStorage.setItem("anonymous_user_id", newId);
+  return newId;
 }

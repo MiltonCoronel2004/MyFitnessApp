@@ -6,7 +6,7 @@ export const createValidator = [
     .notEmpty()
     .withMessage("El nombre es obligatorio")
     .custom(async (name) => {
-      const category = await findCategoryByName(name);
+      const category = await findCategoryByName(name.trim());
       if (category) throw new Error("La categoría ya existe");
 
       return true;

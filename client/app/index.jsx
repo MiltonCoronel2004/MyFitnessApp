@@ -11,8 +11,8 @@ export default function Index() {
   const pagerRef = useRef(null);
   const [headerHeight, setHeaderHeight] = useState(0);
 
-  const [currentIndex, setCurrentIndex] = useState(1);
-  const [currentDate, setCurrentDate] = useState(new Date());
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [currentDate, setCurrentDate] = useState(null);
   const [allWorkouts, setAllWorkouts] = useState([
     {
       id: "1",
@@ -255,16 +255,6 @@ export default function Index() {
       date: "2025-09-26 15:32:00",
     },
     {
-      id: "25",
-      name: "Curl Bíceps + Martillo",
-      sets: [
-        { weight: 15, reps: 12 },
-        { weight: 17.5, reps: 10 },
-        { weight: 20, reps: 8 },
-      ],
-      date: "2025-10-20 15:32:00",
-    },
-    {
       id: "26",
       name: "Remo con Barra",
       sets: [
@@ -295,59 +285,93 @@ export default function Index() {
       date: "2025-10-23 15:32:00",
     },
   ]);
-  const [workouts, setWorkouts] = useState([]);
   const [days, setDays] = useState([]);
-  const [dates, setDates] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [isReady, setIsReady] = useState(false);
+
+  const generateDatesArray = (startDateStr) => {
+    const start = new Date(startDateStr);
+    const limit = new Date();
+    limit.setDate(limit.getDate() + 7);
+    const dates = [];
+
+    const dias = ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"];
+    const meses = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
+
+    const current = new Date(start);
+    while (current <= limit) {
+      const dateObj = new Date(current);
+      const dia = dias[dateObj.getDay()];
+      const mes = meses[dateObj.getMonth()];
+      const num = dateObj.getDate();
+
+      dates.push({
+        comparable: dateObj,
+        formatted: `${dia}, ${mes} ${num}`,
+      });
+      current.setDate(current.getDate() + 1);
+    }
+    return dates;
+  };
 
   useEffect(() => {
     const minDate = allWorkouts.map((w) => new Date(w.date)).reduce((a, b) => (a < b ? a : b), new Date());
-    setDays(generarFechasDesde(minDate));
-  }, [allWorkouts]);
+    const generatedDays = generateDatesArray(minDate);
+    setDays(generatedDays);
 
-  useEffect(() => {
-    if (dates.length > 0) {
-      const todayIndex = dates.findIndex((d) => d.toDateString() === new Date().toDateString());
-      if (todayIndex !== -1) {
-        setCurrentIndex(todayIndex);
-        setCurrentDate(dates[todayIndex]);
-        // fuerza el movimiento visual una vez montado el PagerView
-        setTimeout(() => {
-          pagerRef.current?.setPageWithoutAnimation(todayIndex);
-        }, 0);
-      }
+    const todayIndex = generatedDays.findIndex((d) => d.comparable.toDateString() === new Date().toDateString());
+    if (todayIndex !== -1) {
+      setCurrentIndex(todayIndex);
+      setCurrentDate(generatedDays[todayIndex]);
     }
-  }, [dates]);
+
+    setIsReady(true);
+  }, [allWorkouts]);
 
   const changeDate = (daysDelta) => {
     const newIndex = currentIndex + daysDelta;
     if (newIndex >= 0 && newIndex < days.length) {
       setCurrentIndex(newIndex);
       setCurrentDate(days[newIndex]);
-      pagerRef.current?.setPage(newIndex); // sincroniza visualmente el PageView
+      pagerRef.current?.setPage(newIndex);
     }
   };
 
-  const generarFechasDesde = (fechaInicioStr) => {
-    const inicio = new Date(fechaInicioStr);
-    const limite = new Date();
-    limite.setDate(limite.getDate() + 7); // hasta 7 días después de hoy
-    const fechas = [];
+  if (!isReady) {
+    return (
+      <View className="flex-1 items-center justify-center bg-[#0a0a0a]">
+        <View className="relative w-24 h-24">
+          <View
+            className="absolute inset-0 bg-cyan-500 rounded-full"
+            style={{
+              shadowColor: "#06b6d4",
+              shadowOffset: { width: 0, height: 0 },
+              shadowOpacity: 0.8,
+              shadowRadius: 20,
+              elevation: 10,
+            }}
+          />
+          <View className="absolute inset-2 bg-[#0a0a0a] rounded-full" />
+          <View className="absolute inset-0 items-center justify-center">
+            <View
+              className="w-3 h-3 bg-cyan-400 rounded-full"
+              style={{
+                shadowColor: "#22d3ee",
+                shadowOffset: { width: 0, height: 0 },
+                shadowOpacity: 1,
+                shadowRadius: 10,
+              }}
+            />
+          </View>
+        </View>
+        <View className="mt-8 flex-row gap-1">
+          <View className="w-2 h-2 bg-cyan-500 rounded-full" />
+          <View className="w-2 h-2 bg-purple-500 rounded-full" />
+          <View className="w-2 h-2 bg-pink-500 rounded-full" />
+        </View>
+      </View>
+    );
+  }
 
-    const actual = new Date(inicio);
-    while (actual <= limite) {
-      fechas.push(new Date(actual));
-      actual.setDate(actual.getDate() + 1);
-    }
-    setDates(fechas);
-    return fechas;
-  };
-  // Obtener ejercicios solo para la fecha seleccionada
-  useEffect(() => {
-    const currentDateStr = currentDate.toISOString().split("T")[0];
-    const filtered = allWorkouts.filter((w) => w.date.startsWith(currentDateStr));
-    setWorkouts(filtered);
-  }, [currentDate, allWorkouts]);
   return (
     <View style={{ flex: 1, backgroundColor: "#0a0a0a", paddingTop: insets.top }}>
       <StatusBar style="light" />
@@ -356,23 +380,21 @@ export default function Index() {
         style={{ position: "absolute", top: insets.top, left: 0, right: 0, zIndex: 10 }}
         onLayout={(e) => setHeaderHeight(e.nativeEvent.layout.height)}
       >
-        <Header date_navigator dateLabel={currentDate.toISOString().split("T")[0]} changeDate={changeDate} />
+        <Header date_navigator dateLabel={currentDate.formatted} changeDate={changeDate} />
       </View>
 
       <PagerView
         ref={pagerRef}
         style={{ flex: 1 }}
-        // initialPage={currentIndex}
+        initialPage={currentIndex}
         onPageSelected={(e) => {
-          console.log(e.nativeEvent.position);
-
           const newPos = e.nativeEvent.position;
           setCurrentIndex(newPos);
           setCurrentDate(days[newPos]);
         }}
       >
         {days.map((d, i) => {
-          const dateStr = d.toISOString().split("T")[0];
+          const dateStr = d.comparable.toISOString().split("T")[0];
           const filtered = allWorkouts.filter((w) => w.date.startsWith(dateStr));
 
           return (

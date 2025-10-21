@@ -23,9 +23,9 @@ export default function Header({ date_navigator = false, dateLabel, changeDate, 
                 <Text className="text-cyan-400 text-xl">‹</Text>
               </View>
             </Pressable>
-            <View className="w-11 h-11 bg-cyan-500/20 rounded-xl items-center justify-center">
+            {/* <View className="w-11 h-11 bg-cyan-500/20 rounded-xl items-center justify-center">
               <View className="w-6 h-6 bg-cyan-400 rounded-md" />
-            </View>
+            </View> */}
             <Text className="text-white text-2xl font-semibold tracking-tight">MyFitnessApp</Text>
           </View>
 
